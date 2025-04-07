@@ -1,6 +1,6 @@
 <!--<img src="https://www.svgrepo.com/show/525505/share.svg" width="10" height="10" alt="Partager">-->
 
-<!DOCTYPE html>
+<<!DOCTYPE html>
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
@@ -86,14 +86,7 @@
             border: 2px solid #8b4513;
             border-radius: 10px;
         }
-        #wikipedia-frame {
-            width: 100%;
-            height: 300px;
-            border: 2px solid #8b4513;
-            border-radius: 10px;
-            margin-top: 20px;
-        }
-        #oldmapsonline-frame {
+        #wikipedia-frame, #oldmapsonline-frame {
             width: 100%;
             height: 300px;
             border: 2px solid #8b4513;
@@ -176,6 +169,24 @@
             background-color: #8b4513;
             color: white;
         }
+        @media (max-width: 600px) {
+            #header {
+                flex-direction: column;
+                text-align: center;
+            }
+            #hearts, #score {
+                margin-bottom: 10px;
+            }
+            #question {
+                font-size: 1.5em;
+            }
+            #answer {
+                font-size: 0.9em;
+            }
+            button {
+                font-size: 0.9em;
+            }
+        }
     </style>
     <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
@@ -196,7 +207,7 @@
                     <img src="https://www.svgrepo.com/show/525505/share.svg" width="30" height="30" alt="Partager">
                 </button>
                 <button id="ranking-button" onclick="showRankingForm()">Voir mon classement local</button>
-                <button id="ranking-button" onclick="window.open('https://celestyassou.github.io/Pays_et_CapitaleV2/ClassementMondiale.html', '_blank')">Voir mon classement Mondiale</button>
+                <button id="ranking-button" onclick="window.open('https://www.youtube.com', '_blank')">Voir mon classement Mondiale</button>
             </div>
             <div id="map-container">
                 <div id="map"></div>
