@@ -1,0 +1,487 @@
+<!--<img src="https://www.svgrepo.com/show/525505/share.svg" width="10" height="10" alt="Partager">-->
+
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quiz des Capitales du Monde</title>
+    <style>
+        body {
+            font-family: 'Georgia', serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            margin: 0;
+            background: #f5f5dc;
+            color: #4b4b4b;
+            overflow: auto;
+        }
+        #header {
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            padding: 20px;
+            background-color: #8b4513;
+            color: white;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        #hearts, #score {
+            font-size: 1.5em;
+            font-weight: bold;
+        }
+        #main-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 100%;
+            max-width: 800px;
+            margin: 20px 0;
+        }
+        #unified-container {
+            width: 100%;
+            background: #fffaf0;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        #quiz-container, #map-container, #history-container {
+            width: 100%;
+            margin-bottom: 20px;
+        }
+        #question {
+            font-size: 1.8em;
+            margin-bottom: 20px;
+            color: #555;
+        }
+        #answer {
+            padding: 10px;
+            width: 100%;
+            border: 2px solid #8b4513;
+            border-radius: 5px;
+            font-size: 1em;
+            margin-bottom: 20px;
+            box-sizing: border-box;
+        }
+        button {
+            background-color: #8b4513;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1em;
+            transition: background-color 0.3s;
+        }
+        button:hover {
+            background-color: #704214;
+        }
+        #map {
+            width: 100%;
+            height: 300px;
+            border: 2px solid #8b4513;
+            border-radius: 10px;
+        }
+        #wikipedia-frame {
+            width: 100%;
+            height: 300px;
+            border: 2px solid #8b4513;
+            border-radius: 10px;
+            margin-top: 20px;
+        }
+        #oldmapsonline-frame {
+            width: 100%;
+            height: 300px;
+            border: 2px solid #8b4513;
+            border-radius: 10px;
+            margin-top: 20px;
+        }
+        #share-button {
+            background-color: transparent;
+            border: none;
+            padding: 0;
+        }
+        #share-button img {
+            width: 30px;
+            height: 30px;
+        }
+        #history-list {
+            list-style-type: none;
+            padding: 0;
+        }
+        #history-list li {
+            padding: 10px;
+            border-bottom: 1px solid #ddd;
+        }
+        #history-list li:last-child {
+            border-bottom: none;
+        }
+        #popup {
+            display: none;
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: #fffaf0;
+            border: 2px solid #8b4513;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            z-index: 1000;
+        }
+        #popup h3 {
+            margin-top: 0;
+        }
+        #popup ul {
+            list-style-type: none;
+            padding: 0;
+        }
+        #popup ul li {
+            padding: 5px 0;
+            border-bottom: 1px solid #ddd;
+        }
+        #popup ul li:last-child {
+            border-bottom: none;
+        }
+        #ranking-form {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: #fffaf0;
+            border: 2px solid #8b4513;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            z-index: 1000;
+        }
+        #ranking-form input, #ranking-form button {
+            margin-top: 10px;
+        }
+        #ranking-table {
+            margin-top: 20px;
+            border-collapse: collapse;
+            width: 100%;
+        }
+        #ranking-table th, #ranking-table td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+        #ranking-table th {
+            background-color: #8b4513;
+            color: white;
+        }
+    </style>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+    <script src="countries.js"></script> <!-- Inclure le fichier JavaScript externe -->
+</head>
+<body>
+    <div id="header">
+        <div id="hearts">❤️❤️❤️❤️❤️</div>
+        <div id="score">Score: 0</div>
+    </div>
+    <div id="main-container">
+        <div id="unified-container">
+            <div id="quiz-container">
+                <div id="question"></div>
+                <input type="text" id="answer" placeholder="Entrez votre réponse ici">
+                <button onclick="checkAnswer()">Vérifier</button>
+                <button id="share-button" onclick="shareScore()">
+                    <img src="https://www.svgrepo.com/show/525505/share.svg" width="30" height="30" alt="Partager">
+                </button>
+                <button id="ranking-button" onclick="showRankingForm()">Voir mon classement local</button>
+                <button id="ranking-button" onclick="window.open('https://www.youtube.com', '_blank')">Voir mon classement Mondiale</button>
+            </div>
+            <div id="map-container">
+                <div id="map"></div>
+                <iframe id="wikipedia-frame" src=""></iframe>
+                <iframe id="oldmapsonline-frame" src="https://www.oldmapsonline.org/fr/history/regions#position=3.7762/45.58/14.68"></iframe>
+            </div>
+            <div id="history-container">
+                <h3>Historique des Réponses</h3>
+                <ul id="history-list"></ul>
+                <button onclick="exportHistory()">Exporter en .txt</button>
+            </div>
+        </div>
+    </div>
+    <div id="popup">
+        <h3>Questions Non Réussies</h3>
+        <ul id="failed-list"></ul>
+    </div>
+    <footer>©️ Tout droits réservés a CelestYassou</footer>
+
+    <script>
+        let currentCountry = null;
+        let score = 0;
+        let hearts = 5;
+        let questionType;
+        let questionHistory = [];
+        let previousCountry = null;
+        let previousQuestionType = null;
+        const map = L.map('map').setView([20, 0], 2); // Centré sur l'Afrique, niveau de zoom 2
+
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; OpenStreetMap contributors'
+        }).addTo(map);
+
+        L.control.zoom({
+            position: 'bottomright'
+        }).addTo(map);
+
+        function getRandomCountry() {
+            return countries[Math.floor(Math.random() * countries.length)];
+        }
+
+        function updateQuestion() {
+            previousCountry = currentCountry;
+            previousQuestionType = questionType;
+            currentCountry = getRandomCountry();
+            questionType = Math.random() < 0.5 ? "capital" : "country";
+
+            // Mettre à jour l'iframe OldMapsOnline pour zoomer sur le pays
+            const oldMapsUrl = `https://www.oldmapsonline.org/fr/history/regions#position=${currentCountry.lon}/${currentCountry.lat}/10&year=2010`;
+            document.getElementById('oldmapsonline-frame').src = oldMapsUrl;
+
+            if (questionType === "capital") {
+                document.getElementById('question').innerText = `Quelle est la capitale de ${currentCountry.country}?`;
+            } else {
+                document.getElementById('question').innerText = `Quel est le pays dont la capitale est ${currentCountry.capital}?`;
+            }
+            updateWikipediaFrame();
+        }
+
+        function updateWikipediaFrame() {
+            if (previousCountry) {
+                const wikiUrl = previousQuestionType === "capital"
+                    ? `https://fr.wikipedia.org/wiki/${previousCountry.capital}`
+                    : `https://fr.wikipedia.org/wiki/${previousCountry.country}`;
+                document.getElementById('wikipedia-frame').src = wikiUrl;
+            }
+        }
+
+        function checkAnswer() {
+            const userAnswer = document.getElementById('answer').value.trim().toLowerCase();
+            const correctAnswer = questionType === "capital" ? currentCountry.capital.toLowerCase() : currentCountry.country.toLowerCase();
+
+            if (userAnswer === correctAnswer) {
+                score++;
+                document.getElementById('score').innerText = `Score: ${score}`;
+            } else {
+                hearts--;
+                document.getElementById('hearts').innerText = '❤️'.repeat(hearts);
+                saveFailedQuestion(currentCountry, questionType);
+                if (hearts === 0) {
+                    alert("Game Over! Votre score final est de " + score);
+                    resetGame();
+                }
+            }
+
+            map.setView([currentCountry.lat, currentCountry.lon], 5);
+            L.marker([currentCountry.lat, currentCountry.lon]).addTo(map)
+                .bindPopup(`${currentCountry.capital}, ${currentCountry.country}`)
+                .openPopup();
+
+            addToHistory(currentCountry, questionType, userAnswer === correctAnswer);
+            updateQuestion();
+            document.getElementById('answer').value = '';
+        }
+
+        function resetGame() {
+            score = 0;
+            hearts = 5;
+            document.getElementById('score').innerText = `Score: ${score}`;
+            document.getElementById('hearts').innerText = '❤️'.repeat(hearts);
+            questionHistory = [];
+            document.getElementById('history-list').innerHTML = '';
+            updateQuestion();
+            loadFailedQuestions();
+        }
+
+        function shareScore() {
+            const shareText = `J'ai obtenu un score de ${score} au Quiz des Capitales du Monde ! Essaie de battre mon score : `;
+            const shareUrl = window.location.href;
+            const shareMessage = encodeURIComponent(shareText + shareUrl);
+
+            if (navigator.share) {
+                navigator.share({
+                    title: 'Quiz des Capitales du Monde',
+                    text: shareText,
+                    url: shareUrl
+                }).then(() => {
+                    console.log('Partage réussi');
+                }).catch((error) => {
+                    console.error('Erreur de partage :', error);
+                });
+            } else {
+                const tempInput = document.createElement('input');
+                tempInput.value = shareMessage;
+                document.body.appendChild(tempInput);
+                tempInput.select();
+                document.execCommand('copy');
+                document.body.removeChild(tempInput);
+                alert('Lien copié ! Collez-le pour partager votre score.');
+            }
+        }
+
+        function showRankingForm() {
+            const formHtml = `
+                <div id="ranking-form">
+                    <h3>Enregistrer votre classement</h3>
+                    <input type="text" id="username" placeholder="Votre pseudo">
+                    <input type="text" id="country" placeholder="Votre pays">
+                    <button onclick="saveRanking()">Enregistrer</button>
+                    <button onclick="closeRankingForm()">Fermer</button>
+                </div>
+            `;
+            document.body.insertAdjacentHTML('beforeend', formHtml);
+            document.getElementById('ranking-form').style.display = 'block';
+        }
+
+        function closeRankingForm() {
+            document.getElementById('ranking-form').remove();
+        }
+
+        function saveRanking() {
+            const username = document.getElementById('username').value.trim();
+            const country = document.getElementById('country').value.trim();
+
+            if (username && country) {
+                const rankingData = {
+                    username,
+                    country,
+                    score,
+                    correctAnswers: questionHistory.filter(q => q.isCorrect).length,
+                    totalQuestions: questionHistory.length
+                };
+
+                // Enregistrer les données dans un fichier JSON (simulé ici avec localStorage)
+                let rankings = JSON.parse(localStorage.getItem('rankings') || '[]');
+                rankings.push(rankingData);
+                localStorage.setItem('rankings', JSON.stringify(rankings));
+
+                closeRankingForm();
+                displayRankingTable();
+            } else {
+                alert('Veuillez remplir tous les champs.');
+            }
+        }
+
+        function displayRankingTable() {
+            const rankings = JSON.parse(localStorage.getItem('rankings') || '[]');
+            rankings.sort((a, b) => b.score - a.score);
+
+            let tableHtml = `
+                <h3>Classement</h3>
+                <table id="ranking-table">
+                    <tr>
+                        <th>Rang</th>
+                        <th>Pseudo</th>
+                        <th>Pays</th>
+                        <th>Score</th>
+                        <th>Réponses Correctes</th>
+                        <th>Total Questions</th>
+                    </tr>
+            `;
+
+            rankings.forEach((ranking, index) => {
+                tableHtml += `
+                    <tr>
+                        <td>${index + 1}</td>
+                        <td>${ranking.username}</td>
+                        <td>${ranking.country}</td>
+                        <td>${ranking.score}</td>
+                        <td>${ranking.correctAnswers}</td>
+                        <td>${ranking.totalQuestions}</td>
+                    </tr>
+                `;
+            });
+
+            tableHtml += '</table>';
+            document.body.insertAdjacentHTML('beforeend', tableHtml);
+        }
+
+        function addToHistory(country, type, isCorrect) {
+            const listItem = document.createElement('li');
+            listItem.textContent = isCorrect ? `✅ ${country.country} - ${country.capital}` : `❌ ${country.country} - ${country.capital}`;
+            document.getElementById('history-list').appendChild(listItem);
+            questionHistory.push({ country, type, isCorrect });
+            saveHistory();
+        }
+
+        function saveFailedQuestion(country, type) {
+            const failedQuestions = JSON.parse(getCookie('failedQuestions') || '[]');
+            failedQuestions.push({ country, type });
+            setCookie('failedQuestions', JSON.stringify(failedQuestions), 7);
+        }
+
+        function saveHistory() {
+            setCookie('questionHistory', JSON.stringify(questionHistory), 7);
+        }
+
+        function loadHistory() {
+            const savedHistory = JSON.parse(getCookie('questionHistory') || '[]');
+            savedHistory.forEach(item => {
+                const listItem = document.createElement('li');
+                listItem.textContent = item.isCorrect ? `✅ ${item.country.country} - ${item.country.capital}` : `❌ ${item.country.country} - ${item.country.capital}`;
+                document.getElementById('history-list').appendChild(listItem);
+            });
+        }
+
+        function exportHistory() {
+            const historyText = questionHistory.map(item =>
+                `${item.isCorrect ? '✅' : '❌'} ${item.country.country} - ${item.country.capital}`
+            ).join('\n');
+            const blob = new Blob([historyText], { type: 'text/plain' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'historique_quiz.txt';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+        }
+
+        function loadFailedQuestions() {
+            const failedQuestions = JSON.parse(getCookie('failedQuestions') || '[]');
+            const failedList = document.getElementById('failed-list');
+            failedList.innerHTML = '';
+            failedQuestions.forEach(item => {
+                const listItem = document.createElement('li');
+                listItem.textContent = `❌ ${item.country.country} - ${item.country.capital}`;
+                failedList.appendChild(listItem);
+            });
+            if (failedQuestions.length > 0) {
+                document.getElementById('popup').style.display = 'block';
+            }
+        }
+
+        function setCookie(name, value, days) {
+            const date = new Date();
+            date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
+            const expires = `expires=${date.toUTCString()}`;
+            document.cookie = `${name}=${value};${expires};path=/`;
+        }
+
+        function getCookie(name) {
+            const nameEQ = name + "=";
+            const ca = document.cookie.split(';');
+            for (let i = 0; i < ca.length; i++) {
+                let c = ca[i];
+                while (c.charAt(0) === ' ') c = c.substring(1, c.length);
+                if (c.indexOf(nameEQ) === 0) return c.substring(nameEQ.length, c.length);
+            }
+            return null;
+        }
+
+        updateQuestion();
+        loadHistory();
+        loadFailedQuestions();
+    </script>
+</body>
+</html>
